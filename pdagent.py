@@ -7,10 +7,10 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
 
 # Set page configuration
-st.set_page_config(page_title="Excel File Merger", page_icon="📊")
+st.set_page_config(page_title="PREDICTIVE SUMMARIZER", page_icon="📊")
 
 # Title and description
-st.title("Excel File Merger")
+st.title("PREDICTIVE SUMMARIZER")
 st.markdown("Upload multiple Excel files to merge them into a single file.")
 
 # File uploader widget

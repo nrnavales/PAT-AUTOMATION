@@ -17,7 +17,7 @@ st.markdown("Upload multiple Excel files to merge them into a single file.")
 uploaded_files = st.file_uploader(
     "Choose Excel files to merge",
     accept_multiple_files=True,
-    type=['xlsx']
+    type=['xlsx', 'xls']  # Added xls
 )
 
 # Create a directory to store uploaded files temporarily
@@ -70,7 +70,8 @@ def merge_excel_files(files):
                 f.write(file.getbuffer())
             
             # Read the first sheet of the Excel file
-            df = pd.read_excel(file_path, engine='openpyxl')
+            # Use openpyxl for .xlsx; for .xls, pandas will default to available engine (e.g., xlrd if installed)
+            df = pd.read_excel(file_path, engine=None)  # Let pandas choose the engine
             dfs.append(df)
         
         # Concatenate all DataFrames

@@ -11,13 +11,13 @@ st.set_page_config(page_title="PREDICTIVE SUMMARIZER", page_icon="📊")
 
 # Title and description
 st.title("PREDICTIVE SUMMARIZER")
-st.markdown("Upload multiple Excel files to merge them into a single file.")
+st.markdown("NEKENNAV")
 
 # File uploader widget
 uploaded_files = st.file_uploader(
-    "Choose Excel files to merge",
+    "",  # Removed "Choose Excel files to merge"
     accept_multiple_files=True,
-    type=['xlsx', 'xls']  # Added xls
+    type=['xlsx', 'xls']
 )
 
 # Create a directory to store uploaded files temporarily
@@ -70,8 +70,7 @@ def merge_excel_files(files):
                 f.write(file.getbuffer())
             
             # Read the first sheet of the Excel file
-            # Use openpyxl for .xlsx; for .xls, pandas will default to available engine (e.g., xlrd if installed)
-            df = pd.read_excel(file_path, engine=None)  # Let pandas choose the engine
+            df = pd.read_excel(file_path, engine=None)
             dfs.append(df)
         
         # Concatenate all DataFrames
@@ -103,10 +102,8 @@ def merge_excel_files(files):
             
             # Group by Collector Name and aggregate
             agg_dict = {}
-            # Sum time columns (in seconds)
             for col in valid_time_columns:
                 agg_dict[col] = 'sum'
-            # Keep first occurrence of other columns
             other_columns = [col for col in merged_df.columns if col not in valid_time_columns + ['Collector Name']]
             for col in other_columns:
                 agg_dict[col] = 'first'
@@ -121,7 +118,7 @@ def merge_excel_files(files):
             for col in valid_time_columns:
                 avg_row[col] = merged_df[col].mean()
             for col in other_columns:
-                avg_row[col] = None  # Non-time columns are blank in average row
+                avg_row[col] = None
             
             # Append average row to DataFrame
             avg_df = pd.DataFrame([avg_row])
@@ -146,7 +143,6 @@ if uploaded_files:
     else:
         # Display preview of merged data
         st.write("**Preview of Merged Data**")
-        # Ensure time columns are displayed in [h]:mm:ss
         display_df = merged_df.copy()
         time_columns = [
             'Spent Time', 'Talk Time', 'AVG Talk Time', 'Wait Time',
@@ -167,37 +163,32 @@ if uploaded_files:
         # Prepare download for merged data
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            # Convert time columns to Excel time format (seconds to fraction of a day)
             excel_df = merged_df.copy()
             for col in valid_time_columns:
-                excel_df[col] = excel_df[col] / 86400.0  # Convert seconds to Excel time (1 day = 86400 seconds)
+                excel_df[col] = excel_df[col] / 86400.0
             
             excel_df.to_excel(writer, index=False, sheet_name='Sheet1')
             workbook = writer.book
             worksheet = writer.sheets['Sheet1']
             
-            # Apply [h]:mm:ss format and right-alignment to time columns
             for col in valid_time_columns:
-                col_idx = merged_df.columns.get_loc(col) + 1  # +1 for 1-based index
+                col_idx = merged_df.columns.get_loc(col) + 1
                 col_letter = get_column_letter(col_idx)
-                # Apply format to all data rows (including average row, skip header)
                 for row in range(2, len(merged_df) + 2):
                     cell = worksheet[f"{col_letter}{row}"]
                     cell.number_format = '[h]:mm:ss'
                     cell.alignment = Alignment(horizontal='right')
                 
-                # Right-align header
                 header_cell = worksheet[f"{col_letter}1"]
                 header_cell.alignment = Alignment(horizontal='right')
             
-            # Right-align all other columns except Collector Name
             for col_idx in range(1, len(merged_df.columns) + 1):
                 col_name = merged_df.columns[col_idx - 1]
-                if col_name != 'Collector Name':  # Skip Collector Name column
+                if col_name != 'Collector Name':
                     col_letter = get_column_letter(col_idx)
-                    for row in range(1, len(merged_df) + 2):  # Include header
+                    for row in range(1, len(merged_df) + 2):
                         cell = worksheet[f"{col_letter}{row}"]
-                        if col_name not in valid_time_columns:  # Don't override time columns
+                        if col_name not in valid_time_columns:
                             cell.alignment = Alignment(horizontal='right')
         
         output.seek(0)

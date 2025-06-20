@@ -13,9 +13,23 @@ st.set_page_config(page_title="PREDICTIVE SUMMARIZER", page_icon="📊")
 st.title("PREDICTIVE SUMMARIZER")
 st.markdown("NEKENNAV")
 
+# Inject CSS to reduce whitespace between markdown and file uploader
+st.markdown("""
+    <style>
+    /* Reduce bottom margin of the markdown element */
+    div[data-testid="stMarkdownContainer"] {
+        margin-bottom: -20px !important;
+    }
+    /* Reduce top margin of the file uploader */
+    div[data-testid="stFileUploader"] {
+        margin-top: -10px !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # File uploader widget
 uploaded_files = st.file_uploader(
-    "",  # Removed "Choose Excel files to merge"
+    "",  # No label
     accept_multiple_files=True,
     type=['xlsx', 'xls']
 )
